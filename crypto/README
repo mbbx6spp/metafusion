@@ -1,0 +1,11 @@
+= Metafusion for Rails
+
+== Developers
+* Susan Potter <me@susanpotter.net>
+
+== Contributors
+None at present (feel free to contribute).
+
+== Description
+Provides private key and digital signature encryption mechanisms for application developers that do not want to worry about the details.
+

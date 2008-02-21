@@ -1,0 +1,8 @@
+= CHANGES
+
+== 0.1.0 Changes
+
+=== 2007-09-29
+* Added Metafusion::Crypto::PrivateKey core features
+* Added Metafusion::Crypto::DigitalSignature core features
+

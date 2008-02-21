@@ -1,0 +1,22 @@
+<% require('pathname') %>
+spec:
+  name: metafusion
+  version: <%= Metafusion::Crypto::Version.to_version %>
+  summary: Provides private key and digital signature encryption mechanisms for application developers that do not want to worry about the details.
+  require_path: lib
+  has_rdoc: true
+  autorequire: metafusion/crypto
+  bindir: bin
+#  add_dependency:
+#    json: >=0.4.3
+  requirements:
+  - Ruby 1.8.4+
+  - jcode (for unicode support)
+  required_ruby_version: >= 1.8.2
+  author: Susan Potter
+  email: metafusion@googlegroups.com
+  homepage: http://metafusion.rubyforge.org
+  rubyforge_project: metafusion
+  files: <% (self.project_files + self.spec_files).each do |file| %>
+  - <%= Pathname.new(file).relative_path_from(Pathname.new(@root_dir)) %>
+<% end %>
