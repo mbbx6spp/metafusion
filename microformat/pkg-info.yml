@@ -1,0 +1,22 @@
+<% require('pathname') %>
+spec:
+  name: metafusion-microformat
+  version: <%= Metafusion::Microformat::Version.to_version %>
+  summary: Provides Rails/Merb web applications helpers to render common microformats such as hAtom, hFeed, hEntry, hCard, hRelease, etc.
+  require_path: lib
+  has_rdoc: true
+  autorequire: metafusion/microformat
+  bindir: bin
+#  add_dependency:
+#    json: >=0.4.3
+  requirements:
+  - Ruby 1.8.6+
+  - jcode (for unicode support)
+  required_ruby_version: >= 1.8.6
+  author: Susan Potter
+  email: metafusion@googlegroups.com
+  homepage: http://metafusion.rubyforge.org
+  rubyforge_project: metafusion
+  files: <% (self.project_files + self.spec_files).each do |file| %>
+  - <%= Pathname.new(file).relative_path_from(Pathname.new(@root_dir)) %>
+<% end %>
