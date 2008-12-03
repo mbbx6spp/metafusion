@@ -1,0 +1,19 @@
+<% require('pathname') %>
+spec:
+  name: metafusion-thor
+  version: <%= Metafusion::Thor::Version.to_version %>
+  summary: Provides Thor extensions for any type of Ruby project.
+  require_path: lib
+  has_rdoc: true
+  autorequire: metafusion/thor
+  bindir: bin
+  requirements:
+  - Ruby 1.8.6+
+  required_ruby_version: >= 1.8.6
+  author: Susan Potter
+  email: metafusion@googlegroups.com
+  homepage: http://metafusion.rubyforge.org
+  rubyforge_project: metafusion
+  files: <% (self.project_files + self.spec_files).each do |file| %>
+  - <%= Pathname.new(file).relative_path_from(Pathname.new(@root_dir)) %>
+<% end %>
