@@ -129,4 +129,35 @@ module Metafusion::Crypto
       s
     end
   end
+  
+  # Encodes attributes to be sent over to Paypal securely.
+  # 
+  # For example,
+  #   encoder = PaypalEncoder.new(File.read(app_cert_file), File.read(app_key_file), File.read(paypal_cert_file))
+  #   ....
+  #   data1 = encoder.encrypt(product1_hash)
+  #   data2 = encoder.encrypt(product2_hash)
+  class PaypalEncoder
+    def initialize(app_cert_content, app_key_content, paypal_cert_content)
+      @app_cert = certify(app_cert_content)
+      @app_key = keyify(app_key_content)
+      @paypal_cert = certify(paypal_cert_content)
+    end
+
+    # Encrypts the payment button information they way Paypal expects it.
+    def encrypt(attrs)
+      data = attributes.map { |k, v| "#{k}=#{v}" }.join("\n")
+      signed = OpenSSL::PKCS7::sign(@app_cert, @app_key, data, [], OpenSSL::PKCS7::BINARY)
+      OpenSSL::PKCS7::encrypt([@paypal_cert], signed.to_der, OpenSSL::Cipher::Cipher::new("DES3"), OpenSSL::PKCS7::BINARY).to_s.gsub("\n", "")
+    end
+
+  private
+    def certify(content)
+      OpenSSL::X509::Certificate(content)
+    end
+
+    def keyify(content)
+      OpenSSL::PKey::RSA.new(content, '')
+    end
+  end
 end
