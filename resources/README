@@ -1,0 +1,158 @@
+= metafusion_resources
+
+== Contributors
+
+* Susan Potter - http://geek.susanpotter.net
+
+Feel free to email me to join the project me at susanpotter dot net.  Send me your GitHub username and let me know why you want to be part of the project.
+
+== Copyright
+
+Copyright (c) 2007-2009 Susan Potter.
+
+== License
+
+This is released under the MIT License.
+
+== Overview
+
+The purpose of metafusion_resources is to make resource-based (RESTful) controllers DRY and get away from the verbose code duplication that is currently generated in Rails applications.
+
+This was inspired by make_resourceful, although this has been a personal project of mine (in various forms and at various clients) since before make_resourceful was published.
+
+== The Problem
+
+The problem metafusion_resources (and make_resourceful, see below) tries to solve is the following:
+
+Whenever I generate a resource (via resource or rspec_scaffold) I get a lot of code that looks exactly the same (except for some placeholder information):
+
+  class <model.capitalize>Controller < ApplicationController
+    # GET /<model>/:id
+    # GET /<model>/:id.xml
+    def show
+      @<model> = <model.capitalize>.find(params[:id])
+      
+      respond_to do |format|
+        format.html # show.html.erb
+        format.xml  { render :xml => @<model> }
+      end
+    end
+
+    # GET /<model>/new
+    # GET /<model>/new.xml
+    def new
+      @<model> = <model.capitalize>.new
+
+      respond_to do |format|
+        format.html # new.html.erb
+        format.xml  { render :xml => @<model> }
+      end
+    end
+
+    # GET /<model>/:id/edit
+    def edit
+      @<model> = <model.capitalize>.find(params[:id])
+    end
+
+    # POST /<model>
+    # POST /<model>.xml
+    def create
+      @<model> = <model.capitalize>.new(params[:<model>])
+      
+      respond_to do |format|
+        if @<model>.save
+          flash[:notice] = '<model.capitalize> was successfully created.'
+          format.html { redirect_to :action => 'show' }
+          format.xml  { render :xml => @<model>, :status => :created, :location => @<model> }
+        else
+          format.html { render :action => "new" }
+          format.xml  { render :xml => @<model>.errors, :status => :unprocessable_entity }
+        end
+      end
+    end
+
+    # PUT /<model>/:id
+    # PUT /<model>/:id.xml
+    def update
+      @<model> = <model.capitalize>.find(params[:id])
+
+      respond_to do |format|
+        if @<model>.update_attributes(params[:<model>])
+          flash[:notice] = '<model.capitalize> was successfully updated.'
+          format.html { redirect_to :action => 'show' }
+          format.xml  { head :ok }
+        else
+          format.html { render :action => "edit" }
+          format.xml  { render :xml => @<model>.errors, :status => :unprocessable_entity }
+        end
+      end
+    end
+
+    # DELETE /<model>/:id
+    # DELETE /<model>/:id.xml
+    def destroy
+      @<model> = <model.capitalize>.find(params[:id])
+
+      respond_to do |format|
+        if @<model>.update_attributes(params[:<model>])
+          flash[:notice] = '<model.capitalize> was successfully updated.'
+          format.html { redirect_to <model.pluralize>_path }
+          format.xml  { head :ok }
+        end
+      end
+    end
+  end
+
+Think about this.  If you have even just 6 RESTful controllers, you are duplicating all that code (essentially) 6 different times.  That is 64 lines of code that is pretty much duplicated each time and often you only need to remove one or two of these RESTful methods from a couple of these RESTful controllers.  What a waste!
+
+metafusion_resources is going to try to make it so that you see something like the following in your controller instead of the messy duplication above:
+
+  class <model.capitalize>Controller < ApplicationController
+    resources do |conf|
+      conf.resource_class = <model.capitalize>
+      conf.member_actions = [:show, :update, :edit, :activate] # i.e. no destroy and we added a custom :activate member action
+      conf.collection_actions = [:index, :create]
+      conf.new_actions = [:new]
+    end
+    
+    def activate
+      # no need to load model from params[:id] because it is already handled for us..
+      resource.activate!
+      # no format stuff here either, because this is handled elsewhere
+    end
+  end
+
+As you can see if you are following the regular Rails RESTful conventions for your controllers, you will see an 90.625% reduction in your code (comparing apples to apples).  Less code duplication simply means you can spot problems in your code more quickly when you encounter them - you will not have to sift through lots more code just to find the problem.
+
+If you are still not convinced, it is your loss.  I am very happy for you and your very un-DRY controllers:)  I know this has made my [work] life a lot more pleasant for me personally, but it takes all kinds to make this world, so hacker power to y'all.
+
+== Other projects that do the same thing
+
+The only other project I know that is well supported and tries to solve this basic problem is make_resourceful by Hampton Catlin.  It can be found here:
+
+http://github.com/hcatlin/make_resourceful/tree/master
+
+== Why not use make_resourceful?
+
+Great question and I am glad you asked that.  The principles, ideas and concepts behind make_resourceful are good, in fact, very good.  It uses the principles I would want to build a RESTful & DRY web application on myself.  
+
+However, here is a list of my primary issues with make_resourceful:
+* It generates all the tests using the Test::Unit framework.  For me this is not good for two reasons.
+  * I use RSpec; and
+  * I do not want all the explicit tests _generated_.  The same way I don't want the explicit controller code generated.  We should be providing spec/test helpers that abstract a large portion of the specs/tests than generating all the specs/tests directly.
+* It isn't available as a RubyGem and since I _hate_ putting plugins inside vendor/plugins (it's such a waste of space/bytes) it was more work than I wanted to do myself for a plugin I had no control over to provide a gemspec and cross my fingers and pray that the team would set it up that way.
+* It's syntax isn't exactly the way I would want to define my RESTful resources.  I am picky, I know!  This is a personal preference and not a technical reason, to be perfectly honest.
+
+== Why would someone use make_resourceful instead of metafusion_resources?
+
+I would like to add the comparitive benefits of using make_resourceful here because for some people it will be better to use it than metafusion_resources and this is why:
+* It is more mature from a public plugin perspective.  It has had more eyes on the code than my private version has.
+* It has more people involved in the project, so it is more likely to be updated when new fixes/patches/issues come in.
+* Because more people are involved in the project, support for using it will probably (I am assuming) be better.  One person is not the bottleneck, like it is for this project.  However, if you would like to be involved in the project, please let me know!
+* It generates Test::Unit code and metafusion-resourceful doesn't yet.  So if Test::Unit is your testing framework of choice, this is probably the way to go for the moment.
+
+I didn't want to diss make_resourceful, it simply doesn't fulfill my personal requirements, even though it is a great idea and both make_resourceful and metafusion-resourceful try to solve the same high-level problem, just in different ways!  It is after all twenty times better than living with the code duplication that is generated by default Rails (or even RSpec) generators.  No question.
+
+== I still want to use metafusion_resources, how can I set it up?
+
+So glad you got this far.  The instructions of this are coming soon.  I just need to generate the very first RubyGem of the project on GitHub first that has something more than a README file.  Give me a day or so to get organized.  Thanks!
