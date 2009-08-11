@@ -146,14 +146,14 @@ module Metafusion::Crypto
 
     # Encrypts the payment button information they way Paypal expects it.
     def encrypt(attrs)
-      data = attributes.map { |k, v| "#{k}=#{v}" }.join("\n")
+      data = attrs.map { |k, v| "#{k}=#{v}" }.join("\n")
       signed = OpenSSL::PKCS7::sign(@app_cert, @app_key, data, [], OpenSSL::PKCS7::BINARY)
       OpenSSL::PKCS7::encrypt([@paypal_cert], signed.to_der, OpenSSL::Cipher::Cipher::new("DES3"), OpenSSL::PKCS7::BINARY).to_s.gsub("\n", "")
     end
 
   private
     def certify(content)
-      OpenSSL::X509::Certificate(content)
+      OpenSSL::X509::Certificate.new(content)
     end
 
     def keyify(content)
